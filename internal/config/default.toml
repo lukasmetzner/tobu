@@ -1,0 +1,21 @@
+[finder]
+# Where directories come from. Only "zoxide" is supported for now.
+kind = "zoxide"
+
+[finder.zoxide]
+binary = "zoxide"
+
+[multiplexer]
+# "zellij" or "tmux". Inferred from binary when omitted, zellij if both are omitted.
+# kind = "zellij"
+# Name or path of the multiplexer binary. Defaults to kind.
+# binary = "zellij"
+
+[session]
+# Number of trailing path components in session names: 1 gives "tobu", 2 gives "github.com/tobu".
+# Zellij replaces "/" with "_", tmux replaces "." and ":" with "_".
+name_depth = 1
+
+[editor]
+binary = "nvim"
+args = []
