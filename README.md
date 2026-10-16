@@ -3,6 +3,8 @@
 Pick a running session or a directory from your [zoxide](https://github.com/ajeetdsouza/zoxide) database and jump
 straight into a [zellij](https://zellij.dev) (or tmux) session with your editor open in it.
 
+![tobu demo](demo/demo.gif)
+
 ```sh
 go install github.com/lukasmetzner/tobu@latest
 tobu            # interactive, like zi
