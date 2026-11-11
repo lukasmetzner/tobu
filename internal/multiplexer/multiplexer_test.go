@@ -77,21 +77,65 @@ func TestParseZellijSessions(t *testing.T) {
 		"old-session [Created 3months ago] (EXITED - attach to resurrect)\n" +
 		"has space [Created 5s ago] \n")
 	got := parseZellijSessions(out)
-	if want := []string{"tobu", "github.com_hccm", "has space"}; !slices.Equal(got, want) {
-		t.Errorf("got %q, want %q", got, want)
+	want := []zellijSession{
+		{name: "tobu"},
+		{name: "github.com_hccm"},
+		{name: "old-session", exited: true},
+		{name: "has space"},
+	}
+	if !slices.Equal(got, want) {
+		t.Errorf("got %+v, want %+v", got, want)
 	}
 }
 
-func TestCommandArgs(t *testing.T) {
-	s := Session{Name: "tobu", Dir: "/src/tobu", Command: []string{"nvim", "."}}
+func TestZellijCreateArgs(t *testing.T) {
+	s := Session{Name: "tobu", Dir: "/src/tobu", Commands: [][]string{{"nvim", "."}, {"lazygit"}}}
 
-	zellij := zellijAttachArgs("--create", s)
-	if want := []string{"attach", "--create", "--force-run-commands", "tobu", "--", "nvim", "."}; !slices.Equal(zellij, want) {
-		t.Errorf("zellij args = %v, want %v", zellij, want)
+	if got, want := zellijCreateArgs(s, false), []string{"attach", "--create-background", "--force-run-commands", "tobu"}; !slices.Equal(got, want) {
+		t.Errorf("args = %v, want %v", got, want)
 	}
 
-	tmux := tmuxNewSessionArgs("-A", s)
-	if want := []string{"new-session", "-A", "-s", "tobu", "-c", "/src/tobu", "--", "nvim", "."}; !slices.Equal(tmux, want) {
-		t.Errorf("tmux args = %v, want %v", tmux, want)
+	got := zellijCreateArgs(s, true)
+	if want := []string{"--layout-string", zellijLayout(s), "attach", "--create-background", "--force-run-commands", "tobu"}; !slices.Equal(got, want) {
+		t.Errorf("args = %v, want %v", got, want)
+	}
+}
+
+func TestZellijLayout(t *testing.T) {
+	s := Session{Name: "tobu", Dir: `/src/"my" tobu`, Commands: [][]string{{"/usr/bin/nvim", "."}, {"lazygit"}}}
+	want := `layout {
+    cwd "/src/\"my\" tobu"
+    default_tab_template {
+        pane size=1 borderless=true {
+            plugin location="zellij:tab-bar"
+        }
+        children
+        pane size=1 borderless=true {
+            plugin location="zellij:status-bar"
+        }
+    }
+    tab name="nvim" focus=true {
+        pane command="/usr/bin/nvim" {
+            args "."
+        }
+    }
+    tab name="lazygit" {
+        pane command="lazygit"
+    }
+}
+`
+	if got := zellijLayout(s); got != want {
+		t.Errorf("layout:\n%s\nwant:\n%s", got, want)
+	}
+}
+
+func TestTmuxArgs(t *testing.T) {
+	s := Session{Name: "tobu", Dir: "/src/tobu", Commands: [][]string{{"nvim", "."}, {"lazygit"}}}
+
+	if got, want := tmuxNewSessionArgs(s), []string{"new-session", "-d", "-s", "tobu", "-c", "/src/tobu", "--", "nvim", "."}; !slices.Equal(got, want) {
+		t.Errorf("new-session args = %v, want %v", got, want)
+	}
+	if got, want := tmuxNewWindowArgs(s, s.Commands[1]), []string{"new-window", "-d", "-t", "=tobu:", "-c", "/src/tobu", "--", "lazygit"}; !slices.Equal(got, want) {
+		t.Errorf("new-window args = %v, want %v", got, want)
 	}
 }

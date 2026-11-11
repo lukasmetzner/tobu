@@ -28,16 +28,16 @@ type SessionConfig struct {
 }
 
 type Session struct {
-	Name    string
-	Dir     string
-	Command []string
+	Name     string
+	Dir      string
+	Commands [][]string
 }
 
 type Multiplexer interface {
 	SessionName(dir string) string
 	Sessions(ctx context.Context) ([]string, error)
 	CurrentSession(ctx context.Context) (string, error)
-	Open(s Session) error
+	Open(ctx context.Context, s Session) error
 	Attach(name string) error
 }
 

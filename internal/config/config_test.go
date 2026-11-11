@@ -78,9 +78,12 @@ binary = "/usr/bin/tmux"
 [session]
 name_depth = 2
 
-[editor]
+[[programs]]
 binary = "emacs"
 args = ["-nw"]
+
+[[programs]]
+binary = "lazygit"
 `)
 	cfg, err := LoadFile(path)
 	if err != nil {
@@ -94,23 +97,30 @@ args = ["-nw"]
 		},
 		Multiplexer: multiplexer.Config{Binary: "/usr/bin/tmux"},
 		Session:     multiplexer.SessionConfig{NameDepth: 2},
-		Editor:      Editor{Binary: "emacs", Args: []string{"-nw"}},
+		Programs:    []Program{{Binary: "emacs", Args: []string{"-nw"}}, {Binary: "lazygit"}},
 	}
 	if !reflect.DeepEqual(cfg, want) {
 		t.Errorf("got %+v, want %+v", cfg, want)
 	}
-	if got := cfg.Editor.Command(); !reflect.DeepEqual(got, []string{"emacs", "-nw"}) {
-		t.Errorf("editor command = %v", got)
+	if got, want := cfg.Commands(), [][]string{{"emacs", "-nw"}, {"lazygit"}}; !reflect.DeepEqual(got, want) {
+		t.Errorf("commands = %v, want %v", got, want)
+	}
+}
+
+func TestLoadFileRejectsEmptyPrograms(t *testing.T) {
+	path := writeConfig(t, "programs = []\n")
+	if _, err := LoadFile(path); err == nil || !strings.Contains(err.Error(), "programs") {
+		t.Fatalf("expected empty programs error, got %v", err)
 	}
 }
 
 func TestLoadFileRejectsUnknownKeys(t *testing.T) {
 	path := writeConfig(t, `
-[editor]
+[[programs]]
 bin = "vim"
 `)
 	_, err := LoadFile(path)
-	if err == nil || !strings.Contains(err.Error(), "editor.bin") {
+	if err == nil || !strings.Contains(err.Error(), "programs.bin") {
 		t.Fatalf("expected unknown key error, got %v", err)
 	}
 }

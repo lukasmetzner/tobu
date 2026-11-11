@@ -39,13 +39,15 @@ func (t *Tmux) CurrentSession(ctx context.Context) (string, error) {
 	return strings.TrimSpace(string(out)), err
 }
 
-func (t *Tmux) Open(s Session) error {
-	if !insideTmux() {
-		return replaceProcess(s.Dir, t.binary, tmuxNewSessionArgs("-A", s)...)
-	}
+func (t *Tmux) Open(_ context.Context, s Session) error {
 	if !t.hasSession(s.Name) {
-		if err := run(s.Dir, t.binary, tmuxNewSessionArgs("-d", s)...); err != nil {
+		if err := run(s.Dir, t.binary, tmuxNewSessionArgs(s)...); err != nil {
 			return err
+		}
+		for _, c := range s.Commands[1:] {
+			if err := run(s.Dir, t.binary, tmuxNewWindowArgs(s, c)...); err != nil {
+				return err
+			}
 		}
 	}
 	return t.Attach(s.Name)
@@ -62,8 +64,12 @@ func (t *Tmux) hasSession(name string) bool {
 	return exec.Command(t.binary, "has-session", "-t", tmuxTarget(name)).Run() == nil
 }
 
-func tmuxNewSessionArgs(mode string, s Session) []string {
-	return append([]string{"new-session", mode, "-s", s.Name, "-c", s.Dir, "--"}, s.Command...)
+func tmuxNewSessionArgs(s Session) []string {
+	return append([]string{"new-session", "-d", "-s", s.Name, "-c", s.Dir, "--"}, s.Commands[0]...)
+}
+
+func tmuxNewWindowArgs(s Session, command []string) []string {
+	return append([]string{"new-window", "-d", "-t", tmuxTarget(s.Name) + ":", "-c", s.Dir, "--"}, command...)
 }
 
 func tmuxTarget(name string) string {
