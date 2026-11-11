@@ -33,6 +33,33 @@ Picking a session attaches to it. Picking a directory creates a session for it w
 attaches if that session already exists. Inside zellij or tmux the current client switches to the target session
 instead of nesting, and the session you leave keeps running in the background.
 
+## Hotkey
+
+Inside zellij, tobu can run in a floating pane from a keybinding. Zellij handles the key before the focused pane
+does, so it works from anywhere, including inside your editor. Add to the `keybinds` block of your zellij
+`config.kdl`:
+
+```kdl
+shared_except "locked" {
+    bind "Alt t" {
+        Run "tobu" {
+            floating true
+            close_on_exit true
+            name "tobu"
+        }
+        SwitchToMode "normal"
+    }
+}
+```
+
+The floating pane closes once you pick a target or abort, so it is gone when you return to the session.
+
+With tmux:
+
+```sh
+bind-key t display-popup -E tobu
+```
+
 ## Configuration
 
 `$XDG_CONFIG_HOME/tobu/config.toml` (usually `~/.config/tobu/config.toml`), or the path in `$TOBU_CONFIG`. If the
