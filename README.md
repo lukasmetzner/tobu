@@ -1,7 +1,7 @@
 # tobu
 
 Pick a running session or a directory from your [zoxide](https://github.com/ajeetdsouza/zoxide) database and jump
-straight into a [zellij](https://zellij.dev) (or tmux) session with your editor open in it.
+straight into a [zellij](https://zellij.dev) (or tmux) session with your editor and other programs open in it.
 
 ![tobu demo](demo/demo.gif)
 
@@ -29,9 +29,10 @@ case-sensitively.
 | `pgup` `pgdown`                      | page up / down   |
 | `esc` `ctrl+c` `ctrl+g` `ctrl+q`     | abort            |
 
-Picking a session attaches to it. Picking a directory creates a session for it with the editor as its first pane, or
-attaches if that session already exists. Inside zellij or tmux the current client switches to the target session
-instead of nesting, and the session you leave keeps running in the background.
+Picking a session attaches to it. Picking a directory creates a session for it with each configured program in its own
+tab (tmux: window), the first one focused, or attaches if that session already exists. Inside zellij or tmux the
+current client switches to the target session instead of nesting, and the session you leave keeps running in the
+background. New zellij sessions get the tab and status bar of zellij's default layout.
 
 ## Hotkey
 
@@ -76,7 +77,10 @@ binary = "tmux"
 [session]
 name_depth = 2
 
-[editor]
+[[programs]]
 binary = "emacs"
 args = ["-nw"]
+
+[[programs]]
+binary = "lazygit"
 ```

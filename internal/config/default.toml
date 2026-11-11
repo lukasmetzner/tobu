@@ -16,6 +16,10 @@ binary = "zoxide"
 # Zellij replaces "/" with "_", tmux replaces "." and ":" with "_".
 name_depth = 1
 
-[editor]
+# Programs started in a new session, each in its own tab or window, in this order. The first one has focus.
+[[programs]]
 binary = "nvim"
 args = []
+
+# [[programs]]
+# binary = "lazygit"

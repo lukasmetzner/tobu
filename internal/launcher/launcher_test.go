@@ -52,7 +52,7 @@ func (m *fakeMultiplexer) CurrentSession(context.Context) (string, error) {
 	return "", nil
 }
 
-func (m *fakeMultiplexer) Open(s multiplexer.Session) error {
+func (m *fakeMultiplexer) Open(_ context.Context, s multiplexer.Session) error {
 	m.opened = append(m.opened, s)
 	return nil
 }
@@ -64,7 +64,7 @@ func (m *fakeMultiplexer) Attach(string) error {
 func newTestLauncher(matches map[string]string) (Launcher, *fakeFinder, *fakeMultiplexer) {
 	f := &fakeFinder{matches: matches}
 	m := &fakeMultiplexer{}
-	return Launcher{Finder: f, Multiplexer: m, Editor: []string{"nvim"}}, f, m
+	return Launcher{Finder: f, Multiplexer: m, Commands: [][]string{{"nvim"}}}, f, m
 }
 
 func TestRunWithKeywordsQueriesFinder(t *testing.T) {
@@ -79,7 +79,7 @@ func TestRunWithKeywordsQueriesFinder(t *testing.T) {
 	if want := []string{"/src/github.com/hccm"}; !slices.Equal(f.visited, want) {
 		t.Errorf("visited = %v, want %v", f.visited, want)
 	}
-	want := []multiplexer.Session{{Name: "hccm", Dir: "/src/github.com/hccm", Command: []string{"nvim"}}}
+	want := []multiplexer.Session{{Name: "hccm", Dir: "/src/github.com/hccm", Commands: [][]string{{"nvim"}}}}
 	if !reflect.DeepEqual(m.opened, want) {
 		t.Errorf("opened = %+v, want %+v", m.opened, want)
 	}
@@ -100,7 +100,7 @@ func TestRunWithExistingDirectorySkipsQuery(t *testing.T) {
 	if len(f.queries) != 0 {
 		t.Errorf("expected no queries, got %v", f.queries)
 	}
-	want := []multiplexer.Session{{Name: "hccm", Dir: filepath.Join(root, "hccm"), Command: []string{"nvim"}}}
+	want := []multiplexer.Session{{Name: "hccm", Dir: filepath.Join(root, "hccm"), Commands: [][]string{{"nvim"}}}}
 	if !reflect.DeepEqual(m.opened, want) {
 		t.Errorf("opened = %+v, want %+v", m.opened, want)
 	}

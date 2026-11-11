@@ -32,8 +32,10 @@ func run(ctx context.Context) error {
 		return err
 	}
 
-	if _, err := exec.LookPath(cfg.Editor.Binary); err != nil {
-		return fmt.Errorf("editor: %w", err)
+	for _, p := range cfg.Programs {
+		if _, err := exec.LookPath(p.Binary); err != nil {
+			return fmt.Errorf("programs: %w", err)
+		}
 	}
 
 	f, err := finder.New(cfg.Finder)
@@ -49,6 +51,6 @@ func run(ctx context.Context) error {
 	return launcher.Launcher{
 		Finder:      f,
 		Multiplexer: mux,
-		Editor:      cfg.Editor.Command(),
+		Commands:    cfg.Commands(),
 	}.Run(ctx, os.Args[1:])
 }

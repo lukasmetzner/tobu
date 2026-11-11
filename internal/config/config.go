@@ -24,16 +24,24 @@ type Config struct {
 	Finder      finder.Config             `toml:"finder"`
 	Multiplexer multiplexer.Config        `toml:"multiplexer"`
 	Session     multiplexer.SessionConfig `toml:"session"`
-	Editor      Editor                    `toml:"editor"`
+	Programs    []Program                 `toml:"programs"`
 }
 
-type Editor struct {
+type Program struct {
 	Binary string   `toml:"binary"`
 	Args   []string `toml:"args"`
 }
 
-func (e Editor) Command() []string {
-	return append([]string{e.Binary}, e.Args...)
+func (p Program) Command() []string {
+	return append([]string{p.Binary}, p.Args...)
+}
+
+func (c Config) Commands() [][]string {
+	commands := make([][]string, len(c.Programs))
+	for i, p := range c.Programs {
+		commands[i] = p.Command()
+	}
+	return commands
 }
 
 func Default() Config {
@@ -42,8 +50,8 @@ func Default() Config {
 			Kind:   finder.KindZoxide,
 			Zoxide: finder.ZoxideConfig{Binary: "zoxide"},
 		},
-		Session: multiplexer.SessionConfig{NameDepth: 1},
-		Editor:  Editor{Binary: "nvim", Args: []string{}},
+		Session:  multiplexer.SessionConfig{NameDepth: 1},
+		Programs: []Program{{Binary: "nvim", Args: []string{}}},
 	}
 }
 
@@ -81,6 +89,9 @@ func LoadFile(path string) (Config, error) {
 			keys[i] = key.String()
 		}
 		return Config{}, fmt.Errorf("config %s: unknown keys: %s", path, strings.Join(keys, ", "))
+	}
+	if len(cfg.Programs) == 0 {
+		return Config{}, fmt.Errorf("config %s: programs must not be empty", path)
 	}
 	return cfg, nil
 }

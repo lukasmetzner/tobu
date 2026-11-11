@@ -14,7 +14,7 @@ import (
 type Launcher struct {
 	Finder      finder.Finder
 	Multiplexer multiplexer.Multiplexer
-	Editor      []string
+	Commands    [][]string
 }
 
 func (l Launcher) Run(ctx context.Context, args []string) error {
@@ -78,10 +78,10 @@ func (l Launcher) open(ctx context.Context, t target) error {
 	if t.running {
 		return l.Multiplexer.Attach(t.session)
 	}
-	return l.Multiplexer.Open(multiplexer.Session{
-		Name:    t.session,
-		Dir:     t.dir,
-		Command: l.Editor,
+	return l.Multiplexer.Open(ctx, multiplexer.Session{
+		Name:     t.session,
+		Dir:      t.dir,
+		Commands: l.Commands,
 	})
 }
 
