@@ -6,17 +6,14 @@ kind = "zoxide"
 binary = "zoxide"
 
 [multiplexer]
-# "zellij" or "tmux". Inferred from binary when omitted, zellij if both are omitted.
-# kind = "zellij"
-# Name or path of the multiplexer binary. Defaults to kind.
-# binary = "zellij"
+# Name or path of the zellij binary.
+binary = "zellij"
 
 [session]
-# Number of trailing path components in session names: 1 gives "tobu", 2 gives "github.com/tobu".
-# Zellij replaces "/" with "_", tmux replaces "." and ":" with "_".
+# Number of trailing path components in session names, joined with "_": 1 gives "tobu", 2 gives "github.com_tobu".
 name_depth = 1
 
-# Programs started in a new session, each in its own tab or window, in this order. The first one has focus.
+# Programs started in a new session, each in its own tab, in this order. The first one has focus.
 [[programs]]
 binary = "nvim"
 args = []

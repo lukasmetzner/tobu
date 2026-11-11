@@ -73,7 +73,7 @@ func TestLoadFileMissing(t *testing.T) {
 func TestLoadFileOverridesDefaults(t *testing.T) {
 	path := writeConfig(t, `
 [multiplexer]
-binary = "/usr/bin/tmux"
+binary = "/opt/zellij/bin/zellij"
 
 [session]
 name_depth = 2
@@ -95,7 +95,7 @@ binary = "lazygit"
 			Kind:   finder.KindZoxide,
 			Zoxide: finder.ZoxideConfig{Binary: "zoxide"},
 		},
-		Multiplexer: multiplexer.Config{Binary: "/usr/bin/tmux"},
+		Multiplexer: multiplexer.Config{Binary: "/opt/zellij/bin/zellij"},
 		Session:     multiplexer.SessionConfig{NameDepth: 2},
 		Programs:    []Program{{Binary: "emacs", Args: []string{"-nw"}}, {Binary: "lazygit"}},
 	}

@@ -50,8 +50,9 @@ func Default() Config {
 			Kind:   finder.KindZoxide,
 			Zoxide: finder.ZoxideConfig{Binary: "zoxide"},
 		},
-		Session:  multiplexer.SessionConfig{NameDepth: 1},
-		Programs: []Program{{Binary: "nvim", Args: []string{}}},
+		Multiplexer: multiplexer.Config{Binary: "zellij"},
+		Session:     multiplexer.SessionConfig{NameDepth: 1},
+		Programs:    []Program{{Binary: "nvim", Args: []string{}}},
 	}
 }
 

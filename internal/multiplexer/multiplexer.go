@@ -11,15 +11,7 @@ import (
 	"syscall"
 )
 
-type Kind string
-
-const (
-	KindZellij Kind = "zellij"
-	KindTmux   Kind = "tmux"
-)
-
 type Config struct {
-	Kind   Kind   `toml:"kind"`
 	Binary string `toml:"binary"`
 }
 
@@ -46,46 +38,16 @@ func New(cfg Config, session SessionConfig) (Multiplexer, error) {
 		return nil, fmt.Errorf("session.name_depth must be at least 1, got %d", session.NameDepth)
 	}
 
-	kind, binary, err := resolve(cfg)
+	path, err := exec.LookPath(cfg.Binary)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("zellij: %w", err)
 	}
-
-	path, err := exec.LookPath(binary)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", kind, err)
-	}
-
-	switch kind {
-	case KindZellij:
-		return &Zellij{binary: path, nameDepth: session.NameDepth}, nil
-	case KindTmux:
-		return &Tmux{binary: path, nameDepth: session.NameDepth}, nil
-	default:
-		return nil, fmt.Errorf("unsupported multiplexer kind %q", kind)
-	}
-}
-
-func resolve(cfg Config) (Kind, string, error) {
-	switch {
-	case cfg.Kind == "" && cfg.Binary == "":
-		return KindZellij, string(KindZellij), nil
-	case cfg.Kind == "":
-		kind := Kind(filepath.Base(cfg.Binary))
-		if kind != KindZellij && kind != KindTmux {
-			return "", "", fmt.Errorf("cannot infer multiplexer kind from binary %q, set multiplexer.kind", cfg.Binary)
-		}
-		return kind, cfg.Binary, nil
-	case cfg.Binary == "":
-		return cfg.Kind, string(cfg.Kind), nil
-	default:
-		return cfg.Kind, cfg.Binary, nil
-	}
+	return &Zellij{binary: path, nameDepth: session.NameDepth}, nil
 }
 
 func sessionName(dir string, depth int) string {
 	parts := strings.Split(strings.Trim(filepath.Clean(dir), "/"), "/")
-	return strings.Join(parts[max(len(parts)-depth, 0):], "/")
+	return strings.Join(parts[max(len(parts)-depth, 0):], "_")
 }
 
 func run(dir, binary string, args ...string) error {
