@@ -25,7 +25,7 @@ type zellijSession struct {
 }
 
 func (z *Zellij) SessionName(dir string) string {
-	return strings.ReplaceAll(sessionName(dir, z.nameDepth), "/", "_")
+	return sessionName(dir, z.nameDepth)
 }
 
 func (z *Zellij) Sessions(ctx context.Context) ([]string, error) {
